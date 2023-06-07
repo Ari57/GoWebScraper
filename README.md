@@ -1,2 +1,3 @@
 # GoWebScraper
-Web scraper in Go
+• This project is a web scraper in Go. 
+• It's mainly for learning Golang
