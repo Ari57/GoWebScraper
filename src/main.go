@@ -14,29 +14,38 @@ func main() {
 	// c.Visit(e.Request.AbsoluteURL(link))
 
 	c.OnHTML(".caption", func(e *colly.HTMLElement) {
-		ProductTitle(e)
-		ProductPrice(e)
+		title, link := ProductTitleLink(e)
+		price := ProductPrice(e)
+		ProductFormatter(title, link, price)
 	})
 
 	// c.Visit("https://webscraper.io/test-sites/e-commerce/allinone")
 	c.Visit("https://webscraper.io/test-sites/e-commerce/allinone/computers/tablets")
 }
 
-func ProductTitle(e *colly.HTMLElement) {
+func ProductTitleLink(e *colly.HTMLElement) (string, string) {
+	title := ""
+	link := ""
+
 	e.ForEach(".title", func(_ int, p *colly.HTMLElement) {
+		link = e.Request.AbsoluteURL(p.Attr("href"))
 
 		p.Text = strings.Replace(p.Text, "...", "", -1)
 		p.Text = strings.Replace(p.Text, "\t", "", -1)
 		p.Text = strings.Replace(p.Text, "\n", "", -1)
-
-		fmt.Print(p.Text + " - ")
-
+		title = p.Text
 	})
+	return title, link
 }
 
-func ProductPrice(e *colly.HTMLElement) {
+func ProductPrice(e *colly.HTMLElement) string {
+	price := ""
 	e.ForEach(".float-end.price.card-title.pull-right", func(_ int, p *colly.HTMLElement) {
-		fmt.Print(p.Text)
-		fmt.Println()
+		price = p.Text
 	})
+	return price
+}
+
+func ProductFormatter(title string, link string, price string) {
+	fmt.Println(title + " - " + price + " - " + link)
 }
