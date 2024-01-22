@@ -8,40 +8,35 @@ import (
 )
 
 func main() {
-	title := ""
-	price := ""
-
 	c := colly.NewCollector()
 
-	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		link := e.Attr("href")
-		if strings.Contains(link, "computer") {
-			c.Visit(e.Request.AbsoluteURL(link))
+	// link := e.Attr("href")
+	// c.Visit(e.Request.AbsoluteURL(link))
 
-			c.OnHTML(".wrapper", func(e *colly.HTMLElement) {
-				e.ForEach("h4", func(_ int, p *colly.HTMLElement) {
-					p.Text = strings.Replace(p.Text, "\t", "", -1)
-					p.Text = strings.Replace(p.Text, "\n", "", -1)
-
-					if strings.Contains(p.Text, "$") {
-						price = p.Text
-					} else {
-						p.Text = strings.Replace(p.Text, "...", "", -1)
-						title = p.Text
-					}
-
-					product := title + " - " + price
-					fmt.Println(product)
-				})
-
-			})
-		}
+	c.OnHTML(".caption", func(e *colly.HTMLElement) {
+		ProductTitle(e)
+		ProductPrice(e)
 	})
 
-	// c.OnRequest(func(r *colly.Request) {
-	// 	fmt.Println("")
-	// 	// fmt.Println("Visiting", r.URL)
-	// })
+	// c.Visit("https://webscraper.io/test-sites/e-commerce/allinone")
+	c.Visit("https://webscraper.io/test-sites/e-commerce/allinone/computers/tablets")
+}
 
-	c.Visit("https://webscraper.io/test-sites/e-commerce/allinone")
+func ProductTitle(e *colly.HTMLElement) {
+	e.ForEach(".title", func(_ int, p *colly.HTMLElement) {
+
+		p.Text = strings.Replace(p.Text, "...", "", -1)
+		p.Text = strings.Replace(p.Text, "\t", "", -1)
+		p.Text = strings.Replace(p.Text, "\n", "", -1)
+
+		fmt.Print(p.Text + " - ")
+
+	})
+}
+
+func ProductPrice(e *colly.HTMLElement) {
+	e.ForEach(".float-end.price.card-title.pull-right", func(_ int, p *colly.HTMLElement) {
+		fmt.Print(p.Text)
+		fmt.Println()
+	})
 }
