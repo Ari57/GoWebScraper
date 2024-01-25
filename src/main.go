@@ -10,17 +10,23 @@ import (
 func main() {
 	c := colly.NewCollector()
 
-	// link := e.Attr("href")
-	// c.Visit(e.Request.AbsoluteURL(link))
+	c.OnHTML(".nav.flex-column", func(e *colly.HTMLElement) {
+		e.ForEach("a[href]", func(_ int, p *colly.HTMLElement) {
+			link := e.Request.AbsoluteURL(p.Attr("href"))
+			fmt.Println(" ")
+			fmt.Println("Visiting", link)
+			fmt.Println(" ")
+			c.Visit(link)
 
-	c.OnHTML(".caption", func(e *colly.HTMLElement) {
-		title, link := ProductTitleLink(e)
-		price := ProductPrice(e)
-		ProductFormatter(title, link, price)
+			c.OnHTML(".caption", func(e *colly.HTMLElement) {
+				title, link := ProductTitleLink(e)
+				price := ProductPrice(e)
+				ProductFormatter(title, link, price)
+			})
+		})
 	})
 
-	// c.Visit("https://webscraper.io/test-sites/e-commerce/allinone")
-	c.Visit("https://webscraper.io/test-sites/e-commerce/allinone/computers/tablets")
+	c.Visit("https://webscraper.io/test-sites/e-commerce/allinone")
 }
 
 func ProductTitleLink(e *colly.HTMLElement) (string, string) {
