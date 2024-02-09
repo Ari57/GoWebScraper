@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	titleSlice []string
-	linkSlice  []string
-	priceSlice []string
+	titleSlice       []string
+	descriptionSlice []string
+	linkSlice        []string
+	priceSlice       []string
 )
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 
 	<-done
 
-	WriteData(file, titleSlice, priceSlice, linkSlice)
+	WriteData(file, titleSlice, descriptionSlice, priceSlice, linkSlice)
 }
 
 func FindElements(c *colly.Collector) {
@@ -50,10 +51,10 @@ func FindElements(c *colly.Collector) {
 
 				c.OnHTML(".caption", func(e *colly.HTMLElement) {
 					title, link := ProductTitleLink(e)
+					description := ProductDescription(e)
 					price := ProductPrice(e)
-					// _, _, _ = title, link, price
 
-					titleSlice, linkSlice, priceSlice = ProductFormatter(title, link, price)
+					titleSlice, descriptionSlice, linkSlice, priceSlice = ProductFormatter(title, description, link, price)
 
 				})
 			}
@@ -76,6 +77,17 @@ func ProductTitleLink(e *colly.HTMLElement) (string, string) {
 	return title, link
 }
 
+func ProductDescription(e *colly.HTMLElement) string {
+	description := ""
+
+	e.ForEach(".description.card-text", func(_ int, p *colly.HTMLElement) {
+		description = p.Text
+	})
+
+	return description
+
+}
+
 func ProductPrice(e *colly.HTMLElement) string {
 	price := ""
 	e.ForEach(".float-end.price.card-title.pull-right", func(_ int, p *colly.HTMLElement) {
@@ -84,10 +96,11 @@ func ProductPrice(e *colly.HTMLElement) string {
 	return price
 }
 
-func ProductFormatter(title string, link string, price string) ([]string, []string, []string) {
+func ProductFormatter(title string, description string, link string, price string) ([]string, []string, []string, []string) {
 	titleSlice = append(titleSlice, title)
+	descriptionSlice = append(descriptionSlice, description)
 	linkSlice = append(linkSlice, link)
 	priceSlice = append(priceSlice, price)
 
-	return titleSlice, linkSlice, priceSlice
+	return titleSlice, descriptionSlice, linkSlice, priceSlice
 }
