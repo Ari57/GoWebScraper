@@ -8,13 +8,33 @@ import (
 	"github.com/gocolly/colly"
 )
 
+var (
+	titleSlice []string
+	linkSlice  []string
+	priceSlice []string
+)
+
 func main() {
 	file := CreateDocument()
-	WriteData(file)
 
 	c := colly.NewCollector()
 	c.AllowURLRevisit = false
 
+	done := make(chan struct{})
+
+	go func() {
+		FindElements(c)
+		close(done)
+	}()
+
+	c.Visit("https://webscraper.io/test-sites/e-commerce/allinone")
+
+	<-done
+
+	WriteData(file, titleSlice, priceSlice, linkSlice)
+}
+
+func FindElements(c *colly.Collector) {
 	ProductPages := []string{}
 
 	c.OnHTML(".nav.flex-column", func(e *colly.HTMLElement) {
@@ -31,13 +51,14 @@ func main() {
 				c.OnHTML(".caption", func(e *colly.HTMLElement) {
 					title, link := ProductTitleLink(e)
 					price := ProductPrice(e)
-					ProductFormatter(title, link, price)
+					// _, _, _ = title, link, price
+
+					titleSlice, linkSlice, priceSlice = ProductFormatter(title, link, price)
+
 				})
 			}
 		})
 	})
-
-	c.Visit("https://webscraper.io/test-sites/e-commerce/allinone")
 }
 
 func ProductTitleLink(e *colly.HTMLElement) (string, string) {
@@ -63,6 +84,10 @@ func ProductPrice(e *colly.HTMLElement) string {
 	return price
 }
 
-func ProductFormatter(title string, link string, price string) {
-	// fmt.Println(title + " - " + price + " - " + link)
+func ProductFormatter(title string, link string, price string) ([]string, []string, []string) {
+	titleSlice = append(titleSlice, title)
+	linkSlice = append(linkSlice, link)
+	priceSlice = append(priceSlice, price)
+
+	return titleSlice, linkSlice, priceSlice
 }

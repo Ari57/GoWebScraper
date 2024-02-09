@@ -24,23 +24,30 @@ func SaveDocument(f *excelize.File) {
 	}
 }
 
-func WriteData(f *excelize.File) {
+func WriteData(f *excelize.File, titles []string, prices []string, links []string) {
 	f.SetCellValue("Sheet1", "A1", "Product")
 	f.SetCellValue("Sheet1", "B1", "Price")
 	f.SetCellValue("Sheet1", "C1", "Link")
 
-	data := [][]interface{}{
-		{1, "John", 30},
-		{2, "Alex", 20},
-		{3, "Bob", 40},
-	}
+	// myslice := []string{"title1", "title2", "title3"}
 
-	for i := range data {
+	for i := range titles {
 		dataRow := i + 2
-		column := "A"
+		titleColumn := "A"
+		priceColumn := "B"
+		linkColumn := "C"
 
-		cellRef := fmt.Sprintf("%s%d", column, dataRow)
-		f.SetCellValue("Sheet1", cellRef, "Ejbu")
+		titleValue := titles[i]
+		priceValue := prices[i]
+		linkValue := links[i]
+
+		titleCell := fmt.Sprintf("%s%d", titleColumn, dataRow)
+		priceCell := fmt.Sprintf("%s%d", priceColumn, dataRow)
+		linkCell := fmt.Sprintf("%s%d", linkColumn, dataRow)
+
+		f.SetCellValue("Sheet1", titleCell, titleValue)
+		f.SetCellValue("Sheet1", priceCell, priceValue)
+		f.SetCellValue("Sheet1", linkCell, linkValue)
 	}
 
 	SaveDocument(f)
